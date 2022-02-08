@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst;
 using UnityEngine;
+using UnityEngine.Jobs;
 
 public class LegController : MonoBehaviour
 {
@@ -9,13 +11,19 @@ public class LegController : MonoBehaviour
     [SerializeField]
     private float stepLength = 0.75f;
 
-    private void Update()
+    private TransformAccessArray acces_legs;
+
+    private void Start()
+    {
+    }
+
+    private void FixedUpdate()
     {
         for (int index = 0; index < legs.Length; index++)
         {
             ref var legData = ref legs[index];
             if (!CanMove(index)) continue;
-            if (!legData.Leg.isMoving && 
+            if (!legData.Leg.isMoving &&
                 !(Vector2.Distance(legData.Leg.Position, legData.Raycast.Position) > stepLength)) continue;
             legData.Leg.MoveTo(legData.Raycast.Position);
         }
@@ -35,5 +43,15 @@ public class LegController : MonoBehaviour
     {
         public LegTarget Leg;
         public LegRayCast Raycast;
+    }
+
+
+    [BurstCompile]
+    struct CameraMoveJob : IJobParallelForTransform
+    {
+        public void Execute(int index, TransformAccess transform)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

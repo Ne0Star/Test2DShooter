@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst;
 using UnityEngine;
+using UnityEngine.Jobs;
 
 public class LegTarget : MonoBehaviour
 {
@@ -9,33 +11,44 @@ public class LegTarget : MonoBehaviour
 
     private Vector2 position;
     private Movement? movement;
-    private Transform transform;
 
     public Vector2 Position => position;
     public bool isMoving => (movement != null);
 
+    private TransformAccessArray acces_data;
+    private LegTargetJob job;
     private void Awake()
     {
-        transform = base.transform;
+        acces_data = new TransformAccessArray(new Transform[1] { transform });
         position = transform.position;
     }
 
-    private void Update()
+    public void OnDestroy()
+    {
+        acces_data.Dispose();
+    }
+
+    private void FixedUpdate()
     {
         if (movement != null)
         {
             Movement m = movement.Value;
             m.Progress = Mathf.Clamp01(m.Progress + Time.deltaTime * stepSpeed);
             position = m.Evaluate(Vector2.up, stepCurve);
-            if(m.Progress < 1f)
+            if (m.Progress < 1f)
             {
                 movement = m;
-            } else
+            }
+            else
             {
                 movement = null;
             }
         }
-        transform.position = position;
+        job = new LegTargetJob
+        {
+            position = position,
+        };
+        job.Schedule(acces_data).Complete();
     }
 
     public void MoveTo(Vector2 targetPosition)
@@ -58,8 +71,21 @@ public class LegTarget : MonoBehaviour
                 ToPosition = movement.Value.ToPosition
             };
         }
-
     }
+
+
+
+    [BurstCompile]
+    struct LegTargetJob : IJobParallelForTransform
+    {
+        public Vector2 position;
+
+        public void Execute(int index, TransformAccess transform)
+        {
+            transform.position = position;
+        }
+    }
+
 
     private struct Movement
     {

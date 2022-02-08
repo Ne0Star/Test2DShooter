@@ -24,19 +24,20 @@ public class GunController : MonoBehaviour
         Vector2 point = mousePos;
         current = Mathf.Atan2(point.y - transform.position.y, point.x - transform.position.x) * Mathf.Rad2Deg - angle;
 
-        if (player.currentControllerData.moveStatus == Player.MoveStatus.moveLeft)
+        if (player.Data.moveStatus == Player.MoveStatus.moveLeft)
         {
             angle = 180f;
             header.localScale = new Vector3(1, 1, 1);
         }
-        else if (player.currentControllerData.moveStatus == Player.MoveStatus.moveRight)
+        else if (player.Data.moveStatus == Player.MoveStatus.moveRight)
         {
             header.localScale = new Vector3(-1, -1, 1);
             angle = 0f;
         }
 
         Vector3 pos = mousePos - transform.position;
-        transform.localPosition = startPos + (LevelManager.Instance.Player.currentControllerData.directionLeft ? (pos.normalized * radius) : (pos.normalized * -radius)); //Vector3.ClampMagnitude(startPos + mousePos.normalized, l);
+        bool left = LevelManager.Instance.Player.Data.moveStatus == Player.MoveStatus.stopLeft || LevelManager.Instance.Player.Data.moveStatus == Player.MoveStatus.moveLeft;
+        transform.localPosition = startPos + (left ? (pos.normalized * radius) : (pos.normalized * -radius)); //Vector3.ClampMagnitude(startPos + mousePos.normalized, l);
 
         transform.rotation = Quaternion.AngleAxis(current, Vector3.forward);
 
