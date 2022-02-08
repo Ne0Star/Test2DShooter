@@ -26,14 +26,14 @@ public class Gun : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            if (player.currentControllerData.moveStatus != Player.MoveStatus.moveStop)
+            if (player.Data.moveStatus != Player.MoveStatus.stopLeft && player.Data.moveStatus != Player.MoveStatus.stopRight)
             {
-            if (player.currentControllerData.moveStatus == Player.MoveStatus.moveLeft)
+            if (player.Data.moveStatus == Player.MoveStatus.moveLeft)
             {
                 if (mouseInWorld.x > transform.position.x)
                     return;
             }
-            else if (player.currentControllerData.moveStatus == Player.MoveStatus.moveRight)
+            else if (player.Data.moveStatus == Player.MoveStatus.moveRight)
             {
                 if (mouseInWorld.x < transform.position.x)
                     return;

@@ -21,8 +21,7 @@ public class LevelManager : Singleton<LevelManager>
         events = new GameEvents(useEvents);
         StartCoroutine(LevelLoad());
         // Проверить точки спавна, и полную генерацию уровня.
-
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60000;
 
     }
 
@@ -30,8 +29,6 @@ public class LevelManager : Singleton<LevelManager>
     {
         yield return StartCoroutine(GetPlayer());
         Debug.Log("Игрок найден");
-
-
     }
 
     private IEnumerator GetPlayer()
@@ -69,7 +66,7 @@ public class LevelManager : Singleton<LevelManager>
         {
             if (!use)
                 return;
-            Debug.Log("Евенты активированы");
+            //Debug.Log("Евенты активированы");
             onKeysUp = new OnKeysUp();
         }
         [System.Serializable]
