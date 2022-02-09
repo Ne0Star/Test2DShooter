@@ -35,11 +35,11 @@ public class Player : Players
 
     private Rigidbody2D body;
     private Collider2D bodyCollider;
-
+    private Vector2 LastPos;
 
     private void Awake()
     {
-        
+
 
         body = gameObject.GetComponent<Rigidbody2D>();
         bodyCollider = gameObject.GetComponent<Collider2D>();
@@ -69,26 +69,84 @@ public class Player : Players
         {
             Data.onGround = false;
         }
+        //if (!Data.onGround)
+        //{
+        //    body.gravityScale = 1;
+        //}
+        //else
+        //{
+        //    body.gravityScale = 0;
+        //}
+        var transformUp = transform.up;
+        RaycastHit2D playerY = Physics2D.Raycast(transform.position + Data.debugData.HeightRayOffset * transformUp, -Vector2.up, Data.debugData.HeightRayOffset + Data.debugData.Height, Data.InteractionMask);
+        if (playerY.collider != null)
+        {
+            body.position = Vector2.Lerp(
+                body.position,
+                playerY.point + (Vector2)transformUp * Data.debugData.Height,
+               Data.maxSpeed * Time.fixedDeltaTime
+                );
+            Vector2 vel = body.velocity;
+            vel.y = 0;
+            body.velocity = vel;
+        }
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+        {
+            Data.speed = Mathf.Clamp(Data.speed + Time.fixedDeltaTime * Data.accelerationSpeed, 0, Data.maxSpeed);
+            if (Input.GetKey(KeyCode.A))
+            {
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            body.velocity = new Vector2(-Data.speed, body.velocity.y);
+                Data.moveStatus = MoveStatus.moveLeft;
+                body.velocity = new Vector2(-Data.speed, body.velocity.y);
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                Data.moveStatus = MoveStatus.moveRight;
+                body.velocity = new Vector2(Data.speed, body.velocity.y);
+            }
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A))
         {
-            body.velocity = new Vector2(Data.speed, body.velocity.y);
+            Data.speed = 0f;
+            if (Input.GetKeyUp(KeyCode.D))
+            {
+                Data.moveStatus = MoveStatus.stopRight;
+            }
+            if (Input.GetKeyUp(KeyCode.A))
+            {
+                Data.moveStatus = MoveStatus.stopLeft;
+            }
         }
+
         if (Input.GetKey(KeyCode.Space) && Data.onGround)
         {
             body.AddForce(new Vector2(0, Data.jumpPower));
         }
 
 
+
+        if (Data.moveStatus == Player.MoveStatus.moveLeft || Data.moveStatus == Player.MoveStatus.stopLeft)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else if (Data.moveStatus == Player.MoveStatus.moveRight || Data.moveStatus == Player.MoveStatus.stopRight)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        body.velocity = Vector2.Lerp(body.velocity, new Vector2(0, body.velocity.y), Data.stopCurve.Evaluate(Data.stopSpeed * Time.fixedDeltaTime));
+        LastPos = transform.position;
     }
 
     [System.Serializable]
     public struct PlayerControllerData
     {
+        public AnimationCurve stopCurve;
+        public float stopSpeed;
+        /// <summary>
+        /// Скорость ускорения
+        /// </summary>
+        public float accelerationSpeed;
+        public float maxSpeed;
         /// <summary>
         /// Слои с которыми взаимодействует игрок
         /// </summary>
@@ -128,6 +186,12 @@ public class Player : Players
 
         [SerializeField]
         private float jump_RayDistance;
+        [SerializeField]
+        private float player_YHeight;
+        [SerializeField]
+        private float player_YHeightOffset;
+        public float HeightRayOffset => player_YHeightOffset;
+        public float Height => player_YHeight;
         public float JumpRaydistance => jump_RayDistance;
     }
 
