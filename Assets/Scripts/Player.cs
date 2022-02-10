@@ -96,6 +96,7 @@ public class Player : Players
             if (Input.GetKey(KeyCode.A))
             {
 
+
                 Data.moveStatus = MoveStatus.moveLeft;
                 body.velocity = new Vector2(-Data.speed, body.velocity.y);
             }
