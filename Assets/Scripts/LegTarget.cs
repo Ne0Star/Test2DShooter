@@ -11,15 +11,18 @@ public class LegTarget : MonoBehaviour
 
     private Vector2 position;
     private Movement? movement;
-
+    private Player player;
     public Vector2 Position => position;
     public bool isMoving => (movement != null);
 
     private TransformAccessArray acces_data;
     private LegTargetJob job;
+    private float defaultStepSpeed;
     private void Awake()
     {
         acces_data = new TransformAccessArray(new Transform[1] { transform });
+        player = GameObject.FindObjectOfType<Player>();
+        defaultStepSpeed = stepSpeed;
         position = transform.position;
     }
 
@@ -30,10 +33,11 @@ public class LegTarget : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //stepSpeed = (defaultStepSpeed * Mathf.Lerp(stepSpeed, player.Data.speed, 0.1f * Time.fixedDeltaTime));
         if (movement != null)
         {
             Movement m = movement.Value;
-            m.Progress = Mathf.Clamp01(m.Progress + Time.deltaTime * stepSpeed);
+            m.Progress = Mathf.Clamp01(m.Progress + Time.fixedDeltaTime * stepSpeed);
             position = m.Evaluate(Vector2.up, stepCurve);
             if (m.Progress < 1f)
             {

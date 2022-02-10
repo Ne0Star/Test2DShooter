@@ -23,13 +23,12 @@ public class GunController : MonoBehaviour
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 point = mousePos;
         current = Mathf.Atan2(point.y - transform.position.y, point.x - transform.position.x) * Mathf.Rad2Deg - angle;
-
-        if (player.Data.moveStatus == Player.MoveStatus.moveLeft)
+        if (player.Data.moveStatus == Player.MoveStatus.moveLeft || player.Data.moveStatus == Player.MoveStatus.stopLeft)
         {
             angle = 180f;
             header.localScale = new Vector3(1, 1, 1);
         }
-        else if (player.Data.moveStatus == Player.MoveStatus.moveRight)
+        else if (player.Data.moveStatus == Player.MoveStatus.moveRight || player.Data.moveStatus == Player.MoveStatus.stopRight)
         {
             header.localScale = new Vector3(-1, -1, 1);
             angle = 0f;
@@ -39,16 +38,19 @@ public class GunController : MonoBehaviour
         bool left = LevelManager.Instance.Player.Data.moveStatus == Player.MoveStatus.stopLeft || LevelManager.Instance.Player.Data.moveStatus == Player.MoveStatus.moveLeft;
         transform.localPosition = startPos + (left ? (pos.normalized * radius) : (pos.normalized * -radius)); //Vector3.ClampMagnitude(startPos + mousePos.normalized, l);
 
-        transform.rotation = Quaternion.AngleAxis(current, Vector3.forward);
+        //transform.rotation = Quaternion.AngleAxis(current, Vector3.forward);
 
-        //transform.rotation =
-        //    Quaternion.Euler(
-        //        transform.rotation.eulerAngles.x,
-        //        transform.rotation.eulerAngles.y,
-        //        current);
+
+
+        transform.rotation =
+            Quaternion.Euler(
+                0,
+                0,
+                current); //Mathf.Clamp(current, minAngle, maxAngle)) ;
+
         header.transform.rotation = Quaternion.Euler(
-                transform.rotation.eulerAngles.x,
-                transform.rotation.eulerAngles.y,
+                0,
+                0,
                 current + headerOffset);
 
     }

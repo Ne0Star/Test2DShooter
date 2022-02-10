@@ -40,6 +40,10 @@ public class Gun : MonoBehaviour
             }
             }
 
+
+        }
+        if (Input.GetMouseButtonDown(0))
+        {
             if (Vector2.Distance(mouseInWorld, transform.position) > 1f)
             {
                 GameObject bullet = Instantiate(BulletPrefab, (Vector2)transform.position, Quaternion.identity);
@@ -47,10 +51,6 @@ public class Gun : MonoBehaviour
                 p.direction = (mouseInWorld - (Vector2)transform.position).normalized * 10f;
                 p.Attack((mouseInWorld - (Vector2)transform.position).normalized, Power);
             }
-        }
-        if (Input.GetMouseButtonDown(0))
-        {
-
         }
     }
 }
