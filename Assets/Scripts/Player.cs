@@ -23,7 +23,6 @@ public interface IGroundController : IEnumerator
 }
 
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class Player : Players
 {
     public PlayerControllerData Data = new PlayerControllerData();
@@ -39,7 +38,7 @@ public class Player : Players
 
     private void Awake()
     {
-
+        rigParent.startPos = rigParent.parent.localPosition;
 
         body = gameObject.GetComponent<Rigidbody2D>();
         bodyCollider = gameObject.GetComponent<Collider2D>();
@@ -78,7 +77,8 @@ public class Player : Players
         //    body.gravityScale = 0;
         //}
         var transformUp = transform.up;
-        RaycastHit2D playerY = Physics2D.Raycast(transform.position + Data.debugData.HeightRayOffset * transformUp, -Vector2.up, Data.debugData.HeightRayOffset + Data.debugData.Height, Data.InteractionMask);
+        Debug.DrawRay(transform.position + Data.debugData.MoveHeight_RayOffset, -Vector2.up * (Data.debugData.HeightRayOffset + Data.debugData.Height), Color.yellow);
+        RaycastHit2D playerY = Physics2D.Raycast(transform.position + Data.debugData.HeightRayOffset * transformUp + Data.debugData.MoveHeight_RayOffset, -Vector2.up, Data.debugData.HeightRayOffset + Data.debugData.Height, Data.InteractionMask);
         if (playerY.collider != null)
         {
             body.position = Vector2.Lerp(
@@ -95,8 +95,6 @@ public class Player : Players
             Data.speed = Mathf.Clamp(Data.speed + Time.fixedDeltaTime * Data.accelerationSpeed, 0, Data.maxSpeed);
             if (Input.GetKey(KeyCode.A))
             {
-
-
                 Data.moveStatus = MoveStatus.moveLeft;
                 body.velocity = new Vector2(-Data.speed, body.velocity.y);
             }
@@ -123,9 +121,6 @@ public class Player : Players
         {
             body.AddForce(new Vector2(0, Data.jumpPower));
         }
-
-
-
         if (Data.moveStatus == Player.MoveStatus.moveLeft || Data.moveStatus == Player.MoveStatus.stopLeft)
         {
             transform.localScale = new Vector3(1, 1, 1);
@@ -134,7 +129,8 @@ public class Player : Players
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
-        body.velocity = Vector2.Lerp(body.velocity, new Vector2(0, body.velocity.y), Data.stopCurve.Evaluate(Data.stopSpeed * Time.fixedDeltaTime));
+        rigParent.parent.localPosition = new Vector3(-((Data.maxSpeed / 25f) * Data.speed), rigParent.parent.localPosition.y, 0);
+        //body.velocity = Vector2.Lerp(body.velocity, new Vector2(0, body.velocity.y), Data.stopCurve.Evaluate(Data.stopSpeed * Time.fixedDeltaTime));
         LastPos = transform.position;
     }
 
@@ -184,7 +180,11 @@ public class Player : Players
         /// Скорость обновления управления
         /// </summary>
         public float ControllerUpdateSpeed;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        [SerializeField]
+        private Vector3 moveHeight_RayOffset;
         [SerializeField]
         private float jump_RayDistance;
         [SerializeField]
@@ -194,6 +194,7 @@ public class Player : Players
         public float HeightRayOffset => player_YHeightOffset;
         public float Height => player_YHeight;
         public float JumpRaydistance => jump_RayDistance;
+        public Vector3 MoveHeight_RayOffset => moveHeight_RayOffset;
     }
 
 
@@ -209,6 +210,7 @@ public class Player : Players
     public struct RigParent
     {
         public Transform parent;
+        public Vector2 startPos;
         public Vector2 idlePos;
         public Vector2 moveMaxPos;
         public Vector2 runMaxPos;
