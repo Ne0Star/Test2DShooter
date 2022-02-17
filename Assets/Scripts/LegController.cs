@@ -9,13 +9,13 @@ public class LegController : MonoBehaviour
     [SerializeField]
     private LegData[] legs;
     [SerializeField]
-    private float stepLength = 0.75f;
-
-    private TransformAccessArray acces_legs;
-
+    private float stepLength = 0.75f, stepMaxHeight;
+    [SerializeField]
+    private Player player;
     private void Start()
     {
     }
+
 
     private void FixedUpdate()
     {
@@ -25,7 +25,10 @@ public class LegController : MonoBehaviour
             if (!CanMove(index)) continue;
             if (!legData.Leg.isMoving &&
                 !(Vector2.Distance(legData.Leg.Position, legData.Raycast.Position) > stepLength)) continue;
-            legData.Leg.MoveTo(legData.Raycast.Position);
+            if (legData.Raycast.Position.y <= player.Data.debugData.CenterPoint.y + stepMaxHeight)
+            {
+                legData.Leg.MoveTo(legData.Raycast.Position);
+            }
         }
 
     }
@@ -43,15 +46,5 @@ public class LegController : MonoBehaviour
     {
         public LegTarget Leg;
         public LegRayCast Raycast;
-    }
-
-
-    [BurstCompile]
-    struct CameraMoveJob : IJobParallelForTransform
-    {
-        public void Execute(int index, TransformAccess transform)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

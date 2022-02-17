@@ -63,6 +63,7 @@ public class Player : Players
         if (center.collider != null)
         {
             Data.onGround = true;
+            Data.debugData.CenterPoint = center.point;
         }
         else
         {
@@ -76,20 +77,6 @@ public class Player : Players
         //{
         //    body.gravityScale = 0;
         //}
-        var transformUp = transform.up;
-        Debug.DrawRay(transform.position + Data.debugData.MoveHeight_RayOffset, -Vector2.up * (Data.debugData.HeightRayOffset + Data.debugData.Height), Color.yellow);
-        RaycastHit2D playerY = Physics2D.Raycast(transform.position + Data.debugData.HeightRayOffset * transformUp + Data.debugData.MoveHeight_RayOffset, -Vector2.up, Data.debugData.HeightRayOffset + Data.debugData.Height, Data.InteractionMask);
-        if (playerY.collider != null)
-        {
-            body.position = Vector2.Lerp(
-                body.position,
-                playerY.point + (Vector2)transformUp * Data.debugData.Height,
-               Data.maxSpeed * Time.fixedDeltaTime
-                );
-            Vector2 vel = body.velocity;
-            vel.y = 0;
-            body.velocity = vel;
-        }
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
         {
             Data.speed = Mathf.Clamp(Data.speed + Time.fixedDeltaTime * Data.accelerationSpeed, 0, Data.maxSpeed);
@@ -130,7 +117,7 @@ public class Player : Players
             transform.localScale = new Vector3(-1, 1, 1);
         }
         rigParent.parent.localPosition = new Vector3(-((Data.maxSpeed / 25f) * Data.speed), rigParent.parent.localPosition.y, 0);
-        //body.velocity = Vector2.Lerp(body.velocity, new Vector2(0, body.velocity.y), Data.stopCurve.Evaluate(Data.stopSpeed * Time.fixedDeltaTime));
+        body.velocity = Vector2.Lerp(body.velocity, new Vector2(0, body.velocity.y), Data.stopCurve.Evaluate(Data.stopSpeed * Time.fixedDeltaTime));
         LastPos = transform.position;
     }
 
@@ -176,6 +163,10 @@ public class Player : Players
     [System.Serializable]
     public struct ControllerDebugData
     {
+        /// <summary>
+        /// Точка соприкосновения с поверхностью в центре
+        /// </summary>
+        public Vector2 CenterPoint;
         /// <summary>
         /// Скорость обновления управления
         /// </summary>
